@@ -2,6 +2,7 @@ package bulletin.bulletin.domain.bible.service;
 
 import bulletin.bulletin.domain.bible.entity.Bible;
 import bulletin.bulletin.domain.bible.repository.BibleRepository;
+import dto.BiblePPTDownResponseDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -12,6 +13,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -84,5 +86,10 @@ public class BibleService {
         bible.setContent(String.valueOf(content));
 
         bibleRepository.save(bible);
+    }
+
+    @Transactional
+    public List<Bible> getBible(String title, String startChapter, String startVerse, String endChapter, String endVerse){
+    return bibleRepository.findByBiblePPTDownPostDto(title, startChapter, startVerse, endChapter, endVerse);
     }
 }
