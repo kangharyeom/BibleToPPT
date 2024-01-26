@@ -20,5 +20,8 @@ public interface BibleRepository extends JpaRepository<Bible, Long> {
             @Param("startVerse") String startVerse,
             @Param("endChapter") String endChapter,
             @Param("endVerse") String endVerse
-            );
+    );
+
+    @Query(value = "UPDATE bibles SET title = :fullTitle WHERE title = :shortTitle", nativeQuery = true)
+    void changeFullName(@Param("shortTitle") String shortTitle, @Param("fullTitle") String fullTitle);
 }

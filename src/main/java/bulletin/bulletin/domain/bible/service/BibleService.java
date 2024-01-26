@@ -1,13 +1,17 @@
 package bulletin.bulletin.domain.bible.service;
 
+import bulletin.bulletin.domain.bible.BibleFullName;
+import bulletin.bulletin.domain.bible.BibleShortName;
 import bulletin.bulletin.domain.bible.entity.Bible;
 import bulletin.bulletin.domain.bible.repository.BibleRepository;
-import dto.BiblePPTDownResponseDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.poi.xslf.usermodel.*;
 import org.springframework.stereotype.Service;
 
+import java.awt.*;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -23,7 +27,6 @@ public class BibleService {
 
     @Transactional
     public void insertTextFromFile(String filePath) {
-
         Path path = Paths.get(filePath);
         try {
             // txt의 charset이 EUC-KR임
@@ -88,8 +91,49 @@ public class BibleService {
         bibleRepository.save(bible);
     }
 
+    public void changeFullName(){
+        BibleShortName[] bibleShortName = BibleShortName.values();
+        BibleFullName[] bibleFullName = BibleFullName.values();
+
+        for (int i=0; i<bibleShortName.length; i++) {
+            String shortName = String.valueOf(bibleShortName[i]);
+            String fullName = String.valueOf(bibleFullName[i]);
+            bibleRepository.changeFullName(shortName, fullName);
+        }
+    }
+
+    public void makePPT(List<List<Bible>> biblesList) throws IOException {
+        // 저장 위치 설정
+        String homeDirectory = System.getProperty("user.home");
+        String downloadDirectory = homeDirectory + "/Downloads";
+
+        // 파일 이름 설정
+        String filePath = downloadDirectory + "/output.pptx";
+
+        XMLSlideShow ppt = new XMLSlideShow();
+
+        XSLFSlideMaster defaultMaster = ppt.getSlideMasters().get(0);
+        XSLFSlideLayout titleLayout = defaultMaster.getLayout(SlideLayout.TITLE);
+
+        // 슬라이드 생성
+        XSLFSlide slide = ppt.createSlide(titleLayout);
+
+        // 슬라이드 색상 지정
+        Color backgroundColor = new Color(250, 80, 195);
+        slide.getBackground().setFillColor(backgroundColor);
+
+        // 슬라이드 제목 생성
+        XSLFTextShape title1 = slide.getPlaceholder(0);
+        title1.setText(biblesList.get(0).get(0).getTitle());
+
+        // PPT 다운로드
+        FileOutputStream out = new FileOutputStream(filePath);
+        ppt.write(out);
+        log.info("PPT DOWN");
+    }
+
     @Transactional
     public List<Bible> getBible(String title, String startChapter, String startVerse, String endChapter, String endVerse){
-    return bibleRepository.findByBiblePPTDownPostDto(title, startChapter, startVerse, endChapter, endVerse);
+        return bibleRepository.findByBiblePPTDownPostDto(title, startChapter, startVerse, endChapter, endVerse);
     }
 }

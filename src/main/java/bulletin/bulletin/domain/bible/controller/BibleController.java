@@ -8,6 +8,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,17 +19,24 @@ import java.util.List;
 public class BibleController {
     private final BibleService bibleService;
 
-    @PostMapping("/insert")
-    public void bibleInsert () {
+    @PostMapping
+    public ResponseEntity<String> biblePost () {
         for(int i=1; i<67; i++){
             String filePath = "C:\\Users\\PC\\Downloads\\bible\\bibletxt\\number\\"+i+".txt";
             log.info("filePath:{}",filePath);
             bibleService.insertTextFromFile(filePath);
         }
+        return ResponseEntity.ok("success");
+    }
+
+    @PatchMapping
+    public ResponseEntity<String> biblePatch(){
+        bibleService.changeFullName();
+        return ResponseEntity.ok("success");
     }
 
     @GetMapping("/powerpoint/down")
-    public ResponseEntity<List<List<Bible>>> getBible (@RequestBody List<BiblePPTDownPostDto> biblePPTDownPostDtoList) {
+    public ResponseEntity<List<List<Bible>>> getBible (@RequestBody List<BiblePPTDownPostDto> biblePPTDownPostDtoList) throws IOException {
 
         List<List<Bible>> biblesList = new ArrayList<>();
         List<Bible> bibles;
@@ -43,6 +51,7 @@ public class BibleController {
             );
             biblesList.add(bibles);
         }
+        bibleService.makePPT(biblesList);
 
         return ResponseEntity.ok(biblesList);
     }
