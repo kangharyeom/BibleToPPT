@@ -30,8 +30,8 @@ public class BibleController {
     }
 
     @PatchMapping
-    public ResponseEntity<String> biblePatch(){
-        bibleService.changeFullName();
+    public ResponseEntity<String> changeShortNameToFullName(){
+        bibleService.changeShortNameToFullName();
         return ResponseEntity.ok("success");
     }
 

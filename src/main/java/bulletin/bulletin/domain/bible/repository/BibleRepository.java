@@ -8,12 +8,13 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface BibleRepository extends JpaRepository<Bible, Long> {
-    @Query(value = "SELECT * FROM bibles WHERE title = :title " +
-            "AND bible_id BETWEEN ( " +
-            "SELECT bible_id FROM bibles WHERE title = :title AND chapter = :startChapter AND verse = :startVerse) " +
-            "AND ( " +
-            "SELECT bible_id FROM bibles WHERE title = :title AND chapter = :endChapter AND verse = :endVerse) " +
-            "ORDER BY bible_id ASC", nativeQuery = true)
+    @Query(value =
+            "SELECT * FROM bibles " +
+                    "WHERE title = :title AND bible_id BETWEEN " +
+                    "   (SELECT bible_id FROM bibles WHERE title = :title AND chapter = :startChapter AND verse = :startVerse) " +
+                    "   AND " +
+                    "   (SELECT bible_id FROM bibles WHERE title = :title AND chapter = :endChapter AND verse = :endVerse) " +
+                    "ORDER BY bible_id ASC", nativeQuery = true)
     List<Bible> findByBiblePPTDownPostDto (
             @Param("title") String title,
             @Param("startChapter") String startChapter,
@@ -23,5 +24,8 @@ public interface BibleRepository extends JpaRepository<Bible, Long> {
     );
 
     @Query(value = "UPDATE bibles SET title = :fullTitle WHERE title = :shortTitle", nativeQuery = true)
-    void changeFullName(@Param("shortTitle") String shortTitle, @Param("fullTitle") String fullTitle);
+    void changeShortNameToFullName(@Param("shortTitle") String shortTitle, @Param("fullTitle") String fullTitle);
+
+    @Query(value = "UPDATE bibles SET content = REGEXP_REPLACE(content, '<[^>]+> ', '') WHERE content REGEXP '<[^>]+>'", nativeQuery = true)
+    void deleteAllow();
 }

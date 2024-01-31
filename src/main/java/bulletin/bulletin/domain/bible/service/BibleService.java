@@ -7,10 +7,12 @@ import bulletin.bulletin.domain.bible.repository.BibleRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.poi.sl.usermodel.ShapeType;
 import org.apache.poi.xslf.usermodel.*;
 import org.springframework.stereotype.Service;
 
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -70,7 +72,6 @@ public class BibleService {
             } else if (Character.isDigit(ch)) {
                 chapter.append(ch);
             }
-            // 다른 경우에 대한 처리가 필요하다면 추가할 수 있습니다.
         }
         log.info("title:{}", title);
         log.info("chapter:{}", chapter);
@@ -91,15 +92,18 @@ public class BibleService {
         bibleRepository.save(bible);
     }
 
-    public void changeFullName(){
+    public void changeShortNameToFullName(){
         BibleShortName[] bibleShortName = BibleShortName.values();
         BibleFullName[] bibleFullName = BibleFullName.values();
 
         for (int i=0; i<bibleShortName.length; i++) {
             String shortName = String.valueOf(bibleShortName[i]);
             String fullName = String.valueOf(bibleFullName[i]);
-            bibleRepository.changeFullName(shortName, fullName);
+            bibleRepository.changeShortNameToFullName(shortName, fullName);
         }
+
+        // <> 안에있는 소제목 제거
+        bibleRepository.deleteAllow();
     }
 
     public void makePPT(List<List<Bible>> biblesList) throws IOException {
@@ -117,14 +121,50 @@ public class BibleService {
 
         // 슬라이드 생성
         XSLFSlide slide = ppt.createSlide(titleLayout);
+        XSLFGroupShape groupShape = slide.createGroup();
+
+        // 슬라이드 제목 생성
+        XSLFTextShape title1 = slide.getPlaceholder(0);
+        XSLFTextShape title2 = slide.getPlaceholder(1);
+        title1.setText(biblesList.get(0).get(0).getTitle());
+        title2.setText(biblesList.get(0).get(0).getContent());
+        title1.setAnchor(new Rectangle2D.Double(10, 400, 180, 130));
+
+        groupShape.addShape(title1);
+        groupShape.addShape(title2);
+
+        // 도형 생성 (예: 직사각형)
+        XSLFAutoShape shape1 = slide.createAutoShape();
+        XSLFAutoShape shape2 = slide.createAutoShape();
+        XSLFSimpleShape simpleShape1 = shape1;
+        XSLFSimpleShape simpleShape2 = shape2;
 
         // 슬라이드 색상 지정
         Color backgroundColor = new Color(250, 80, 195);
         slide.getBackground().setFillColor(backgroundColor);
 
-        // 슬라이드 제목 생성
-        XSLFTextShape title1 = slide.getPlaceholder(0);
-        title1.setText(biblesList.get(0).get(0).getTitle());
+        // 도형 타입 설정 (직사각형)
+        shape1.setShapeType(ShapeType.ROUND_RECT);
+        shape2.setShapeType(ShapeType.ROUND_RECT);
+
+        // 도형 크기 및 위치 설정
+        shape1.setAnchor(new Rectangle2D.Double(10, 400, 700, 130));
+        shape2.setAnchor(new Rectangle2D.Double(10, 400, 180, 130));
+
+        // 도형 두께 설정
+        shape1.setLineWidth(6.0);
+        shape2.setLineWidth(6.0);
+        Color skyBlue = new Color(179, 244, 255); // RGB로 진한 파랑색
+        simpleShape1.setLineColor(skyBlue);
+        simpleShape2.setLineColor(skyBlue);
+
+        // 도형 배경색 설정
+        Color darkBlue = new Color(25, 80, 120); // RGB로 진한 파랑색
+        shape1.setFillColor(Color.WHITE);
+        shape2.setFillColor(darkBlue);
+
+        groupShape.addShape(shape1);
+        groupShape.addShape(shape2);
 
         // PPT 다운로드
         FileOutputStream out = new FileOutputStream(filePath);
