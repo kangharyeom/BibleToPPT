@@ -1,4 +1,4 @@
-package dto;
+package bulletin.bulletin.domain.bible.dto;
 
 import lombok.*;
 
