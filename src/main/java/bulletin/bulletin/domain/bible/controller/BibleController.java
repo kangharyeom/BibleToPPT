@@ -57,7 +57,7 @@ public class BibleController {
         return ResponseEntity.ok("success");
     }
 
-    @GetMapping("/powerpoint/download")
+    @PostMapping("/powerpoint/download")
     public ResponseEntity<?> getBible(@RequestBody List<BiblePPTDownPostDto> biblePPTDownPostDtoList) throws IOException {
 
         List<List<Bible>> biblesList = new ArrayList<>();
