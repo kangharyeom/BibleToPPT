@@ -8,6 +8,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.poi.sl.usermodel.ShapeType;
+import org.apache.poi.sl.usermodel.TextParagraph;
+import org.apache.poi.sl.usermodel.VerticalAlignment;
 import org.apache.poi.xslf.usermodel.*;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -44,29 +46,14 @@ public class BibleService {
         XSLFSlideLayout titleLayout = defaultMaster.getLayout(SlideLayout.TITLE);
 
         for (List<Bible> bibles : biblesList) {
-
-            // 슬라이드 생성
-
             for (Bible bible : bibles) {
                 // 도형 생성 (예: 직사각형)
                 XSLFSlide slide = ppt.createSlide(titleLayout);
                 XSLFAutoShape shape1 = slide.createAutoShape();
                 XSLFAutoShape shape2 = slide.createAutoShape();
 
-                // 슬라이드 제목 생성
-                XSLFTextShape title1 = slide.getPlaceholder(0);
-                XSLFTextShape title2 = slide.getPlaceholder(1);
-                title1.setText(bible.getTitle());
-                title2.setText(bible.getContent());
-                title1.setAnchor(new Rectangle2D.Double(10, 400, 180, 130));
-                title2.setAnchor(new Rectangle2D.Double(300, 400, 400, 130));
-
-                // 슬라이드 색상 지정
-                Color backgroundColor = new Color(250, 80, 195);
-                slide.getBackground().setFillColor(backgroundColor);
-
                 // 도형 타입 설정 (직사각형)
-//                shape1.setShapeType(ShapeType.ROUND_RECT);
+                shape1.setShapeType(ShapeType.ROUND_RECT);
                 shape2.setShapeType(ShapeType.ROUND_RECT);
 
                 // 도형 크기 및 위치 설정
@@ -79,10 +66,51 @@ public class BibleService {
                 Color skyBlue = new Color(179, 244, 255); // RGB로 진한 파랑색
 
                 // 도형 배경색 설정
-//                Color darkBlue = new Color(25, 80, 120); // RGB로 진한 파랑색
+                Color darkBlue = new Color(25, 80, 120); // RGB로 진한 파랑색
                 shape1.setFillColor(Color.WHITE);
-//                shape2.setFillColor(darkBlue);
+                shape2.setFillColor(darkBlue);
 
+                // 제목 텍스트를 포함할 도형
+                XSLFAutoShape titleShape = slide.createAutoShape();
+                titleShape.setShapeType(ShapeType.ROUND_RECT);
+                titleShape.setAnchor(new Rectangle2D.Double(10, 400, 180, 130));
+                titleShape.setLineWidth(6.0);
+
+                // 제목 텍스트 설정
+                XSLFTextParagraph titlePara = titleShape.addNewTextParagraph();
+                XSLFTextRun titleRun = titlePara.addNewTextRun();
+                titleRun.setText(bible.getTitle());
+                titlePara.setTextAlign(TextParagraph.TextAlign.CENTER);
+                titleShape.setVerticalAlignment(VerticalAlignment.MIDDLE);
+
+                // 내용 텍스트 도형
+                XSLFAutoShape contentShape = slide.createAutoShape();
+                contentShape.setAnchor(new Rectangle2D.Double(190, 400, 520, 130));
+
+                // 내용 텍스트 설정
+                XSLFTextParagraph contentPara = contentShape.addNewTextParagraph();
+                XSLFTextRun contentRun = contentPara.addNewTextRun();
+                contentRun.setText(bible.getContent());
+                contentPara.setTextAlign(TextParagraph.TextAlign.CENTER);
+                contentShape.setVerticalAlignment(VerticalAlignment.MIDDLE);
+
+                // 폰트 색상 설정 (선택사항)
+                titleRun.setFontColor(Color.BLACK);
+                contentRun.setFontColor(Color.BLACK);
+
+                // 제목 폰트 설정
+                titleRun.setFontSize(30.0);  // 포인트 단위
+                titleRun.setFontFamily("맑은 고딕");  // 폰트 패밀리 설정
+                titleRun.setBold(true);  // 굵게 설정
+
+                // 내용 폰트 설정
+                contentRun.setFontSize(30.0);  // 포인트 단위
+                contentRun.setFontFamily("맑은 고딕");  // 폰트 패밀리 설정
+                contentRun.setBold(true);  // 굵게 설정
+
+                // 슬라이드 색상 지정
+                Color backgroundColor = new Color(250, 80, 195);
+                slide.getBackground().setFillColor(backgroundColor);
             }
         }
         // PPT 다운로드
