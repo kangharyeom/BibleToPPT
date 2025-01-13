@@ -40,47 +40,51 @@ public class BibleService {
         String filePath = downloadDirectory + "/output.pptx";
 
         XMLSlideShow ppt = new XMLSlideShow();
-
         XSLFSlideMaster defaultMaster = ppt.getSlideMasters().get(0);
         XSLFSlideLayout titleLayout = defaultMaster.getLayout(SlideLayout.TITLE);
 
-        // 슬라이드 생성
-        XSLFSlide slide = ppt.createSlide(titleLayout);
-        XSLFGroupShape groupShape = slide.createGroup();
+        for (List<Bible> bibles : biblesList) {
 
-        // 슬라이드 제목 생성
-        XSLFTextShape title1 = slide.getPlaceholder(0);
-        XSLFTextShape title2 = slide.getPlaceholder(1);
-        title1.setText(biblesList.get(0).get(0).getTitle());
-        title2.setText(biblesList.get(0).get(0).getContent());
-        title1.setAnchor(new Rectangle2D.Double(10, 400, 180, 130));
+            // 슬라이드 생성
 
-        // 도형 생성 (예: 직사각형)
-        XSLFAutoShape shape1 = slide.createAutoShape();
-        XSLFAutoShape shape2 = slide.createAutoShape();
+            for (Bible bible : bibles) {
+                // 도형 생성 (예: 직사각형)
+                XSLFSlide slide = ppt.createSlide(titleLayout);
+                XSLFAutoShape shape1 = slide.createAutoShape();
+                XSLFAutoShape shape2 = slide.createAutoShape();
 
-        // 슬라이드 색상 지정
-        Color backgroundColor = new Color(250, 80, 195);
-        slide.getBackground().setFillColor(backgroundColor);
+                // 슬라이드 제목 생성
+                XSLFTextShape title1 = slide.getPlaceholder(0);
+                XSLFTextShape title2 = slide.getPlaceholder(1);
+                title1.setText(bible.getTitle());
+                title2.setText(bible.getContent());
+                title1.setAnchor(new Rectangle2D.Double(10, 400, 180, 130));
+                title2.setAnchor(new Rectangle2D.Double(300, 400, 400, 130));
 
-        // 도형 타입 설정 (직사각형)
-        shape1.setShapeType(ShapeType.ROUND_RECT);
-        shape2.setShapeType(ShapeType.ROUND_RECT);
+                // 슬라이드 색상 지정
+                Color backgroundColor = new Color(250, 80, 195);
+                slide.getBackground().setFillColor(backgroundColor);
 
-        // 도형 크기 및 위치 설정
-        shape1.setAnchor(new Rectangle2D.Double(10, 400, 700, 130));
-        shape2.setAnchor(new Rectangle2D.Double(10, 400, 180, 130));
+                // 도형 타입 설정 (직사각형)
+//                shape1.setShapeType(ShapeType.ROUND_RECT);
+                shape2.setShapeType(ShapeType.ROUND_RECT);
 
-        // 도형 두께 설정
-        shape1.setLineWidth(6.0);
-        shape2.setLineWidth(6.0);
-        Color skyBlue = new Color(179, 244, 255); // RGB로 진한 파랑색
+                // 도형 크기 및 위치 설정
+                shape1.setAnchor(new Rectangle2D.Double(10, 400, 700, 130));
+                shape2.setAnchor(new Rectangle2D.Double(10, 400, 180, 130));
 
-        // 도형 배경색 설정
-        Color darkBlue = new Color(25, 80, 120); // RGB로 진한 파랑색
-        shape1.setFillColor(Color.WHITE);
-        shape2.setFillColor(darkBlue);
+                // 도형 두께 설정
+                shape1.setLineWidth(6.0);
+                shape2.setLineWidth(6.0);
+                Color skyBlue = new Color(179, 244, 255); // RGB로 진한 파랑색
 
+                // 도형 배경색 설정
+//                Color darkBlue = new Color(25, 80, 120); // RGB로 진한 파랑색
+                shape1.setFillColor(Color.WHITE);
+//                shape2.setFillColor(darkBlue);
+
+            }
+        }
         // PPT 다운로드
         FileOutputStream out = new FileOutputStream(filePath);
         ppt.write(out);
@@ -91,7 +95,6 @@ public class BibleService {
     public void insertTextFromFile(String classpathFilePath) {
         Path path = Paths.get(classpathFilePath);
         try {
-            // txt의 charset이 EUC-KR임
             Files.lines(path, Charset.forName("EUC-KR")).forEach(line -> {
                 columnDistinguish(line);
             });
@@ -106,16 +109,13 @@ public class BibleService {
             Resource resource = new ClassPathResource(classpathFilePath);
             BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream(), Charset.forName("EUC-KR")));
 
-            // Read lines from the file
             reader.lines().forEach(line -> {
-                // Assuming columnDistinguish is a method you have for processing each line
                 columnDistinguish(line);
             });
 
-            reader.close(); // Close the BufferedReader
+            reader.close();
         } catch (IOException e) {
             e.printStackTrace();
-            // Handle the exception appropriately
         }
     }
 
@@ -157,7 +157,7 @@ public class BibleService {
 
         // content 추출
         // str[0]을 제외한 나머지가 content 입니다.
-        for(int j =1; j<str.length; j++){
+        for (int j = 1; j < str.length; j++) {
             content.append(str[j] + " ");
         }
         log.info("content:{}", content);
@@ -171,11 +171,11 @@ public class BibleService {
         bibleRepository.save(bible);
     }
 
-    public void changeShortNameToFullName(){
+    public void changeShortNameToFullName() {
         BibleShortName[] bibleShortName = BibleShortName.values();
         BibleFullName[] bibleFullName = BibleFullName.values();
 
-        for (int i=0; i<bibleShortName.length; i++) {
+        for (int i = 0; i < bibleShortName.length; i++) {
             String shortName = String.valueOf(bibleShortName[i]);
             String fullName = String.valueOf(bibleFullName[i]);
             bibleRepository.changeShortNameToFullName(shortName, fullName);
@@ -187,7 +187,7 @@ public class BibleService {
 
 
     @Transactional
-    public List<Bible> getBible(String title, String startChapter, String startVerse, String endChapter, String endVerse){
+    public List<Bible> getBible(String title, String startChapter, String startVerse, String endChapter, String endVerse) {
         return bibleRepository.findByBiblePPTDownPostDto(title, startChapter, startVerse, endChapter, endVerse);
     }
 }
