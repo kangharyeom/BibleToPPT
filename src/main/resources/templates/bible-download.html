@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bible Download</title>
+</head>
+<body>
+<h1>Bible Download</h1>
+<form id="bibleForm">
+    <!-- Title -->
+    <label for="title">Bible Title:</label>
+    <input type="text" id="title" name="title" required>
+    <br><br>
+
+    <!-- Start Chapter -->
+    <label for="startChapter">Start Chapter:</label>
+    <input type="text" id="startChapter" name="startChapter" required>
+    <br><br>
+
+    <!-- Start Verse -->
+    <label for="startVerse">Start Verse:</label>
+    <input type="text" id="startVerse" name="startVerse" required>
+    <br><br>
+
+    <!-- End Chapter -->
+    <label for="endChapter">End Chapter:</label>
+    <input type="text" id="endChapter" name="endChapter" required>
+    <br><br>
+
+    <!-- End Verse -->
+    <label for="endVerse">End Verse:</label>
+    <input type="text" id="endVerse" name="endVerse" required>
+    <br><br>
+
+    <!-- Add More Inputs -->
+    <button type="button" id="addMore">Add More</button>
+    <br><br>
+
+    <!-- Submit -->
+    <button type="submit">Download</button>
+</form>
+
+<div id="response" style="margin-top: 20px;"></div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("bibleForm");
+        const addMoreButton = document.getElementById("addMore");
+        const responseDiv = document.getElementById("response");
+
+        // Add more input fields for additional BiblePPTDownPostDto entries
+        addMoreButton.addEventListener("click", function () {
+            const fieldSet = `
+                <hr>
+                <label for="title">Bible Title:</label>
+                <input type="text" name="title" required>
+                <br><br>
+                <label for="startChapter">Start Chapter:</label>
+                <input type="text" name="startChapter" required>
+                <br><br>
+                <label for="startVerse">Start Verse:</label>
+                <input type="text" name="startVerse" required>
+                <br><br>
+                <label for="endChapter">End Chapter:</label>
+                <input type="text" name="endChapter" required>
+                <br><br>
+                <label for="endVerse">End Verse:</label>
+                <input type="text" name="endVerse" required>
+                <br><br>
+            `;
+            form.insertAdjacentHTML("beforeend", fieldSet);
+        });
+
+        // Handle form submission
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            // Collect form data
+            const formData = new FormData(form);
+            const dataList = [];
+
+            const entries = Array.from(formData.entries());
+            for (let i = 0; i < entries.length; i += 5) {
+                dataList.push({
+                    title: entries[i][1],
+                    startChapter: entries[i + 1][1],
+                    startVerse: entries[i + 2][1],
+                    endChapter: entries[i + 3][1],
+                    endVerse: entries[i + 4][1],
+                });
+            }
+
+            try {
+                // Send POST request with JSON body
+                const response = await fetch('/api/bibles/powerpoint/download', {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(dataList),
+                });
+
+                // Process response
+                const result = await response.json();
+                responseDiv.innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+            } catch (error) {
+                responseDiv.innerHTML = `<p style="color:red;">Error: ${error.message}</p>`;
+            }
+        });
+    });
+</script>
+</body>
+</html>

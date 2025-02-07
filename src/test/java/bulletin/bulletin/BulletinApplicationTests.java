@@ -1,4 +1,4 @@
-package test.java.bulletin.bulletin;
+package bulletin.bulletin;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
