@@ -28,4 +28,13 @@ public interface BibleRepository extends JpaRepository<Bible, Long> {
 
     @Query(value = "UPDATE bibles SET content = REGEXP_REPLACE(content, '<[^>]+> ', '') WHERE content REGEXP '<[^>]+>'", nativeQuery = true)
     void deleteAllow();
+
+    @Query("SELECT DISTINCT b.chapter FROM Bible b WHERE b.title = :title ORDER BY b.chapter")
+    List<String> findDistinctChaptersByTitle(@Param("title") String title);
+
+    @Query("SELECT DISTINCT b.verse FROM Bible b WHERE b.title = :title AND b.chapter = :chapter ORDER BY b.verse")
+    List<String> findDistinctVersesByTitleAndChapter(
+            @Param("title") String title,
+            @Param("chapter") String chapter
+    );
 }

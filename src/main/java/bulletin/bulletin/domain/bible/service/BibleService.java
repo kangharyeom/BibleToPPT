@@ -213,9 +213,20 @@ public class BibleService {
         bibleRepository.deleteAllow();
     }
 
-
     @Transactional
     public List<Bible> getBible(String title, String startChapter, String startVerse, String endChapter, String endVerse) {
         return bibleRepository.findByBiblePPTDownPostDto(title, startChapter, startVerse, endChapter, endVerse);
     }
+
+    // 특정 성경 책의 전체 장 목록 조회
+    public List<String> getChaptersByBook(String bookName) {
+        return bibleRepository.findDistinctChaptersByTitle(bookName);
+    }
+
+    // 특정 성경 책과 장의 전체 절 목록 조회
+    public List<String> getVersesByBookAndChapter(String bookName, String chapter) {
+        return bibleRepository.findDistinctVersesByTitleAndChapter(bookName, chapter);
+    }
 }
+
+
